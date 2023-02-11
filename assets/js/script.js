@@ -20,12 +20,23 @@ var taskFormHandler = function(event) {
 
   formEl.reset();
 
-  var taskDataObj = {
-    name: taskNameInput,
-    type: taskTypeInput
-  };
+  // test if in edit mode
+  var isEdit = formEl.hasAttribute("data-task-id");
 
-  createTaskEl(taskDataObj)
+  // if has attribute returns true > go to complete edit function
+  if (isEdit) {
+    var taskId = formEl.getAttribute("data-task-id");
+    completeEditTask(taskNameInput, taskTypeInput, taskId);
+  } 
+  // no data attribute, so create object as normal and pass to createTaskEl function
+  else {
+    var taskDataObj = {
+      name: taskNameInput,
+      type: taskTypeInput
+    };
+  
+    createTaskEl(taskDataObj);
+  }
 
 };
 
@@ -101,20 +112,60 @@ var createTaskActions = function(taskId) {
 
 // Handles button tray per task item
 var taskButtonHandler = function(event) {
-  console.log(event.target)
+  var targetEl = event.target
 
   // identifies if targeted click matches class name "delete-btn", if so perform function
-  if (event.target.matches(".delete-btn")) {
-    // get the element's task id
-    var taskId = event.target.getAttribute("data-task-id");
-  deleteTask(taskId);
+  if (targetEl.matches(".edit-btn")) {
+    var taskId = targetEl.getAttribute("data-task-id");
+    editTask(taskId);
+  } 
+  // delete button was clicked
+  else if (targetEl.matches(".delete-btn")) {
+    var taskId = targetEl.getAttribute("data-task-id");
+    deleteTask(taskId);
   }
 }
 
 // delete task function, per button click
 var deleteTask = function(taskId) {
+  // finds the parent <li> of the delete button, then removes it from the html
   var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
   taskSelected.remove()
+};
+
+// edit task function, per button click
+var editTask = function(taskId) {
+  console.log(taskId);
+
+  // get task list item element
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  // get content from task name and type
+  var taskName = taskSelected.querySelector("h3.task-name").textContent;
+  console.log(taskName);
+
+  var taskType = taskSelected.querySelector("span.task-type").textContent;
+  console.log(taskType);
+
+  // write values of taskname and taskType to form to be edited
+  document.querySelector("input[name='task-name']").value = taskName;
+  document.querySelector("select[name='task-type']").value = taskType;
+
+  // turns header into "edit mode", gives form a "data-task-id attribute", we will check this in the taskFormHandler
+  formEl.setAttribute("data-task-id", taskId);
+  // changes the button so user will know we are in edit mode
+  formEl.querySelector("#save-task").textContent = "Save Task";
+};
+
+// completes the edit request
+var completeEditTask = function(taskName, taskType, taskId) {
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  // set new values
+  taskSelected.querySelector("h3.task-name").textContent = taskName
+  taskSelected.querySelector("span.task-type").textContent = tastType;
+
+  alert("Task Updated!")
 };
 
 formEl.addEventListener("submit", taskFormHandler);
