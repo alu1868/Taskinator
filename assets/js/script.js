@@ -2,7 +2,9 @@ var taskIdCounter = 0;
 
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do"); 
+var pageContentEl = document.querySelector("#page-content");
 
+// Collects info from form, turns into an object
 var taskFormHandler = function(event) {
 
   event.preventDefault();
@@ -27,13 +29,14 @@ var taskFormHandler = function(event) {
 
 };
 
+// Creates Item with info from object
 var createTaskEl = function (taskDataObj) {
   // create list item
   var listItemEl = document.createElement("li");
   listItemEl.className = "task-item";
 
   // give task id a custom attribute
-  listItemEl.setAttribute("tata-task-id", taskIdCounter)
+  listItemEl.setAttribute("data-task-id", taskIdCounter)
 
   // create div to hold task, give task info --> [append <div> to <li>] 
   var taskInfoEl = document.createElement("div");
@@ -52,6 +55,7 @@ var createTaskEl = function (taskDataObj) {
   taskIdCounter++;
 }
 
+// creates the button tray per item
 var createTaskActions = function(taskId) {
 
   // create action container
@@ -95,4 +99,23 @@ var createTaskActions = function(taskId) {
   return actionContainerEl;
 };
 
+// Handles button tray per task item
+var taskButtonHandler = function(event) {
+  console.log(event.target)
+
+  // identifies if targeted click matches class name "delete-btn", if so perform function
+  if (event.target.matches(".delete-btn")) {
+    // get the element's task id
+    var taskId = event.target.getAttribute("data-task-id");
+  deleteTask(taskId);
+  }
+}
+
+// delete task function, per button click
+var deleteTask = function(taskId) {
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+  taskSelected.remove()
+};
+
 formEl.addEventListener("submit", taskFormHandler);
+pageContentEl.addEventListener("click", taskButtonHandler)
