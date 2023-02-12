@@ -59,21 +59,36 @@ var createTaskEl = function (taskDataObj) {
   taskInfoEl.innerHTML = "<h3 class='task-name'>" + taskDataObj.name + "</h3><span class='task-type'>" + taskDataObj.type + "</span>";
   listItemEl.appendChild(taskInfoEl);
 
+  var taskActionsEl = createTaskActions(taskIdCounter);
+  listItemEl.appendChild(taskActionsEl);
+
+  switch (taskDataObj.status) {
+    case "to do":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 0;
+      tasksToDoEl.append(listItemEl);
+      break;
+    case "in progress":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 1;
+      tasksInProgressEl.append(listItemEl);
+      break;
+    case "completed":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 2;
+      tasksCompletedEl.append(listItemEl);
+      break;
+    default:
+      console.log("Something went wrong!");
+  }
+
   taskDataObj.id = taskIdCounter;
 
   tasks.push(taskDataObj);
 
   saveTasks()
 
-  // runs createTaskActions function, returns the container for all the buttons --> [append <div> to <li>]
-  var taskActionsEl = createTaskActions(taskIdCounter);
-  listItemEl.appendChild(taskActionsEl);
-
-  // append <li> to <ul>
-  tasksToDoEl.appendChild(listItemEl);
-
   // add one to taskIdCounter for next task creation
   taskIdCounter++;
+
+  
 }
 
 // creates the button tray per item
@@ -239,11 +254,35 @@ var taskStatusChangeHandler = function(event) {
   saveTasks()
 };
 
-// handles task array local storage
+// handles tasks array local storage
 var saveTasks = function() {
+  // stringify the object, then put into storage
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+// loads tasks from local storage
+var loadTasks = function() {
+  var savedTasks = localStorage.getItem("tasks");
+
+  if (!savedTasks) {
+    return false;
+  }
+
+  savedTasks = JSON.parse(savedTasks);
+  // loop through savedTasks array
+  for (var i = 0; i < savedTasks.length; i++) {
+  // pass each task object into the `createTaskEl()` function
+  createTaskEl(savedTasks[i]);
+  }
+}
+
+// Create a new Task
 formEl.addEventListener("submit", taskFormHandler);
+
+// editing and deleting existing tasks
 pageContentEl.addEventListener("click", taskButtonHandler)
+
+// changing task to different sections
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+loadTasks();
